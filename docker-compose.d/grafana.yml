@@ -1,0 +1,15 @@
+version: "2.3"
+services:
+  grafana:
+    image: grafana/grafana:4.6.3
+    volumes:
+      - ./grafana_etc:/etc/grafana
+      - grafana_lib:/var/lib/grafana
+      - grafana_log:/var/log/grafana
+    healthcheck:
+      test: curl http://adminer:3000 || exit 1
+
+volumes:
+  grafana_etc:
+  grafana_lib:
+  grafana_log:

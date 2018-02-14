@@ -1,0 +1,35 @@
+version: "2.3"
+services:
+  pg:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_DB:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-user}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: PGPASSWORD=$${POSTGRES_PASSWORD} psql --username $$POSTGRES_USER --dbname $${POSTGRES_DB} -c "select 1;" || exit 1
+  pg_exporter:
+    image: wrouesnel/postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@pg/${POSTGRES_DB:-user}?sslmode=disable
+    depends_on: 
+      - pg
+    network_mode: service:pg
+  pgadmin4:
+    image: jouve/pgadmin4
+    environment:
+      PGADMIN_SETUP_EMAIL: ${PGADMIN_SETUP_EMAIL:-user@localhost}
+      PGADMIN_SETUP_PASSWORD: ${PGADMIN_SETUP_PASSWORD:-password}
+    depends_on: 
+      - pg
+    volumes:
+      - pgadmin4_lib:/var/lib/pgadmin
+      - pgadmin4_log:/var/log/pgadmin
+    healthcheck:
+      test: python -c "import urllib.request; urllib.request.urlopen('http://pgadmin4:8000', None, 1)"
+volumes:
+  pg_data:
+  pgadmin4_lib:
+  pgadmin4_log:

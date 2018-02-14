@@ -1,0 +1,9 @@
+version: "2.3"
+services:
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: echo stats | nc -w 1 mcd 11211 || exit 1
+  redis_exporter:
+    image: oliver006/redis_exporter
+    network_mode: service:redis

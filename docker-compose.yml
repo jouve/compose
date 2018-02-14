@@ -1,0 +1,35 @@
+version: "2"
+services:
+  apk-proxy:
+    image: jouve/apt-cacher-ng:alpine-latest
+  distfiles-proxy:
+    image: jouve/apt-cacher-ng:gentoo-latest
+  deb-proxy:
+    image: jouve/apt-cacher-ng:debian-latest
+  ubuntu-proxy:
+    image: jouve/apt-cacher-ng:ubuntu-latest
+  devpi:
+    image: jouve/devpi:4.4.0-0.1
+  prx:
+    image: haproxy
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+    ports:
+      - 80:80
+      - 3141:3141
+      - 3142:3142
+    depends_on:
+      - apk-proxy
+      - distfiles-proxy
+  prx-log:
+    image: jouve/syslog-ng
+    network_mode: service:prx
+  prx_exporter:
+    image: quay.io/prometheus/haproxy-exporter:v0.9.0
+    command:
+      - --haproxy.scrape-uri
+      - http://prx:3142/haproxy?stats;csv
+    ports:
+      - 9101:9101
+    depends_on:
+      - prx

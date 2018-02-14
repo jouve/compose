@@ -1,0 +1,12 @@
+version: "2.3"
+services:
+  piwik:
+    image: piwik
+    volumes: 
+      - piwik_data:/var/www/html
+    depends_on:
+      - maria
+    healthcheck:
+      test: curl http://piwik:80 || exit 1
+volumes:
+  piwik_data:

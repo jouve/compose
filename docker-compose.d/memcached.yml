@@ -1,0 +1,12 @@
+version: "2.3"
+services:
+  mcd:
+    image: memcached:alpine
+    healthcheck:
+      test: echo stats | nc -w 1 mcd 11211 || exit 1
+  mcd_exporter:
+    image: quay.io/prometheus/memcached-exporter:v0.3.0
+    command:
+      - --memcached.address
+      - mcd:11211
+    network_mode: service:mcd

@@ -1,0 +1,12 @@
+version: "2"
+services:
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.0.0
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus_etc:/etc/prometheus
+    healthcheck:
+      test: wget --quiet --tries 1 -O /dev/null http://localhost:9090
+volumes:
+  prometheus_data:
+   prometheus_etc:

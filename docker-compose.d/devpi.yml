@@ -1,0 +1,10 @@
+version: "2.3"
+services:
+  devpi:
+    image: jouve/devpi
+    volumes:
+      - devpi_data:/var/lib/devpi
+    healthcheck:
+      test: python -c "import urllib.request; urllib.request.urlopen('http://devpi:3141', None, 1)"
+volumes:
+  devpi_data:

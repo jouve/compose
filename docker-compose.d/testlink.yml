@@ -1,0 +1,22 @@
+version: "2.3"
+services:
+  testlink:
+    image: jouve/testlink
+    volumes: 
+      - testlink_data:/var/www/html
+      - testlink_logs:/var/testlink/logs
+      - testlink_upload:/var/testlink/upload_area
+    environment:
+      DB_TYPE: postgres
+      DB_USER: testlink
+      DB_PASS: testlink
+      DB_HOST: pg
+      DB_NAME: testlink
+    depends_on:
+      - postgres
+    healthcheck:
+      test: curl http://testlink:80 || exit 1
+volumes:
+  testlink_data:
+  testlink_logs:
+  testlink_upload:
