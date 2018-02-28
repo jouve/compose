@@ -1,0 +1,57 @@
+version: "2"
+services:
+  acng:
+    image: jouve/apt-cacher-ng
+    build:
+      context: acng
+  acng-alpine:
+    image: jouve/apt-cacher-ng-alpine
+    build:
+      context: acng-alpine
+    depends_on:
+      - acng
+  acng-debian:
+    image: jouve/apt-cacher-ng-debian
+    build:
+      context: acng-debian
+    depends_on:
+      - acng
+  acng-gentoo:
+    image: jouve/apt-cacher-ng-gentoo
+    build:
+      context: acng-gentoo
+    depends_on:
+      - acng
+  acng-ubuntu:
+    image: jouve/apt-cacher-ng-ubuntu
+    build:
+      context: acng-ubuntu
+    depends_on:
+      - acng
+  devpi:
+    image: jouve/devpi
+    build:
+      context: devpi
+      args:
+        DEVPI_SERVER_VERSION: 4.4.0
+        DEVPI_WEB_VERSION: 3.2.2
+  pgadmin4:
+    image: jouve/pgadmin4
+    build:
+      context: pgadmin4
+      args:
+        PGADMIN_VERSION: "2.1"
+  squid:
+    image: jouve/squid
+    build:
+      context: squid
+  syslog-ng:
+    image: jouve/syslog-ng
+    build:
+      context: syslog-ng
+  testlink:
+    image: jouve/testlink
+    build:
+      context: testlink
+      args:
+        TESTLINK_VERSION: 1.9.16

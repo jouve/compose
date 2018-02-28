@@ -1,0 +1,36 @@
+version: "2.3"
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.3.1
+    environment:
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER: default=http://etcd:2380
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd:2380
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+  postgres0:
+    image: jouve/patroni
+    build:
+      context: patroni
+    command: tail -f /dev/null
+    init: true
+  postgres1:
+    image: jouve/patroni
+    build:
+      context: patroni
+    command: tail -f /dev/null
+    init: true
+  postgres2:
+    image: jouve/patroni
+    build:
+      context: patroni
+    command: tail -f /dev/null
+    init: true
+  haproxy:
+    image: haproxy:alpine
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+    ports:
+      - 80:80
+      - 5432:5432
+

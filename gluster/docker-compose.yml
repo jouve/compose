@@ -1,0 +1,39 @@
+version: "2.3"
+services:
+  g1:
+    image: gluster/gluster-centos:gluster3u10_centos7
+    volumes:
+      #- /dev:/dev
+      #- /sys/fs/cgroup:/sys/fs/cgroup
+      - g1_etc:/etc/glusterfs:z
+      - g1_lib:/var/lib/glusterd:z
+      - g1_log:/var/log/glusterfs:z
+    privileged: true
+  g2:
+    image: gluster/gluster-centos:gluster3u10_centos7
+    volumes:
+      #- /dev:/dev
+      #- /sys/fs/cgroup:/sys/fs/cgroup
+      - g2_etc:/etc/glusterfs:z
+      - g2_lib:/var/lib/glusterd:z
+      - g2_log:/var/log/glusterfs:z
+    privileged: true
+  g3:
+    image: gluster/gluster-centos:gluster3u10_centos7
+    volumes:
+      #- /dev:/dev
+      #- /sys/fs/cgroup:/sys/fs/cgroup
+      - g3_etc:/etc/glusterfs:z
+      - g3_lib:/var/lib/glusterd:z
+      - g3_log:/var/log/glusterfs:z
+    privileged: true
+volumes:
+  g1_etc:
+  g1_lib:
+  g1_log:
+  g2_etc:
+  g2_lib:
+  g2_log:
+  g3_etc:
+  g3_lib:
+  g3_log:

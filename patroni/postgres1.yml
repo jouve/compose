@@ -1,0 +1,57 @@
+scope: postgres
+namespace: /db/
+name: postgresql1
+
+restapi:
+    listen: 0.0.0.0:8008
+    connect_address: postgres1:8008
+
+etcd:
+    host: etcd:2379
+
+bootstrap:
+    dcs:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+        maximum_lag_on_failover: 1048576
+        postgresql:
+            use_pg_rewind: true
+
+    initdb:
+    - encoding: UTF8
+    - data-checksums
+
+    pg_hba:
+    - host replication replicator 0.0.0.0/32 md5
+    - host all all 0.0.0.0/0 md5
+
+    users:
+        admin:
+            password: admin
+            options:
+                - createrole
+                - createdb
+
+postgresql:
+    listen: 0.0.0.0:5432
+    connect_address: postgres1:5432
+    data_dir: /var/lib/postgresql/data/data
+    pgpass: /tmp/pgpass
+    authentication:
+        replication:
+            username: replicator
+            password: rep-pass
+        superuser:
+            username: postgres
+            password: secretpassword
+    parameters:
+        unix_socket_directories: '.'
+
+tags:
+    nofailover: false
+    noloadbalance: false
+    clonefrom: false
+    nosync: false
+
+
