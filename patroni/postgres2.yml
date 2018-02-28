@@ -1,6 +1,6 @@
 scope: postgres
 namespace: /db/
-name: postgresql1
+name: postgresql2
 
 restapi:
     listen: 0.0.0.0:8008
