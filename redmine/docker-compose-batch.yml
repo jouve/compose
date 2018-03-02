@@ -1,0 +1,24 @@
+version: "2.3"
+services:
+  migrate:
+    image: jouve/redmine:3.4.4-1
+    #build:
+    #  context: wyredmine
+    #  args:
+    #    GITLAB_TOKEN: ${GITLAB_TOKEN}
+    command:
+      - rails
+      - r
+      - puts 'done'
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_SECRET_KEY_BASE: azerty
+      #REDMINE_NO_DB_MIGRATE: "1"
+      REDMINE_PLUGINS_MIGRATE: "1"
+    volumes:
+      - redmine_files:/usr/src/redmine/files
+volumes:
+  redmine_files:

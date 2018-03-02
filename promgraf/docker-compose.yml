@@ -1,0 +1,106 @@
+version: "2.3"
+services:
+  grafana:
+    image: grafana/grafana:5.0.0
+    volumes:
+      - ./grafana:/etc/grafana
+      - grafana_lib:/var/lib/grafana
+      - grafana_log:/var/log/grafana
+    restart: always
+    mem_limit: 128m
+    memswap_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    healthcheck:
+      test: curl --fail --max-time 1 http://localhost:3000/metrics >/dev/null 2>&1 || exit 1
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.1.0
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus:/etc/prometheus
+    restart: always
+    mem_limit: 750m
+    memswap_limit: 750m
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    healthcheck:
+      test: wget --quiet --timeout 1 --tries 1 -O /dev/null http://localhost:9090/metrics || exit 1
+  haproxy:
+    image: haproxy:1.8.4-alpine
+    volumes:
+      - ./haproxy_etc:/usr/local/etc/haproxy
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    mem_limit: 16m
+    memswap_limit: 16m
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    depends_on:
+      - haproxy-log
+    healthcheck:
+      test: wget --quiet --timeout 1 --tries 1 -O /dev/null http://localhost:8080/haproxy?stats || exit 1
+  haproxy-log:
+    image: jouve/syslog-ng:3.9.1
+    restart: always
+    mem_limit: 4m
+    memswap_limit: 4m
+    healthcheck:
+      test: netstat -lu | tail -n -2 | grep :syslog || exit 1
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+  haproxy-exporter:
+    image: quay.io/prometheus/haproxy-exporter:v0.9.0
+    command:
+      - --haproxy.scrape-uri
+      - http://haproxy:8080/haproxy?stats;csv
+    ports:
+      - 9101:9101
+    restart: always
+    depends_on:
+      - haproxy
+    mem_limit: 16m
+    memswap_limit: 16m
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    healthcheck:
+      test: wget --quiet --timeout 1 --tries 1 -O /dev/null http://localhost:9101/metrics || exit 1
+  cadvisor:
+    image: google/cadvisor:v0.29.0
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    ports:
+      - 8080:8080
+    restart: always
+    mem_limit: 96m
+    memswap_limit: 96m
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+    healthcheck:
+      test: wget --quiet --timeout 1 --tries 1 -O /dev/null http://localhost:8080/metrics || exit 1
+
+volumes:
+  grafana_lib:
+  grafana_log:
+  grafana_master_lib:
+  grafana_master_log:
+  prometheus_data:

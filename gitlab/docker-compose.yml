@@ -1,0 +1,47 @@
+version: "2.0"
+services:
+  gitlab:
+    image: gitlab/gitlab-ce
+    volumes:
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
+    ports:
+      - 443:443
+      - 80:80
+      - "2222:22"
+    depends_on:
+      - db
+      - redis
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      POSTGRES_DB: gitlabhq_production
+      POSTGRES_USER: gitlab
+      POSTGRES_PASSWORD: gitlab
+  pg_exporter:
+    image: wrouesnel/postgres_exporter:v0.3.0
+    environment:
+      DATA_SOURCE_NAME: postgresql://gitlab:gitlab@localhost/gitlabhq_production?sslmode=disable
+    depends_on: 
+      - db
+    network_mode: service:db
+  redis:
+    image: redis:alpine
+  redis_exporter:
+    image: oliver006/redis_exporter
+    network_mode: service:redis
+    depends_on:
+      - redis
+#  prometheus:
+#    image: quay.io/prometheus/prometheus:v2.0.0
+#    volumes:
+#      - ./prometheus:/etc/prometheus
+#      - /srv/gitlab/prometheus_data:/prometheus
+#    ports:
+#      - 9090:9090
+
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:

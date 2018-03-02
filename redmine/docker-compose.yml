@@ -1,0 +1,59 @@
+version: "2.3"
+services:
+  db:
+    image: mariadb:10.3.4
+    environment:
+      MYSQL_USER: redmine
+      MYSQL_PASSWORD: redmine
+      MYSQL_DATABASE: redmine
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - ./db://docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.10.0
+    environment:
+      DATA_SOURCE_NAME: redmine:redmine@(db:3306)/redmine
+    command:
+      - -collect.slave_status=false
+    depends_on:
+      - db
+  redmine:
+    image: jouve/redmine:3.4.4-1
+    build:
+      context: wyredmine
+      args:
+        GITLAB_TOKEN: ${GITLAB_TOKEN}
+    environment:
+      REDMINE_DB_MYSQL: db
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: redmine
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_SECRET_KEY_BASE: azerty
+      REDMINE_NO_DB_MIGRATE: "1"
+      #REDMINE_PLUGINS_MIGRATE: "1"
+    volumes:
+      - redmine_files:/usr/src/redmine/files
+  haproxy:
+    image: haproxy:1.5.19-alpine
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+    ports:
+      - 8080:80
+      - 9104:9104
+    depends_on:
+      - haproxy-log
+  haproxy-log:
+    image: jouve/syslog-ng
+  haproxy-exporter:
+    image: prom/haproxy-exporter:v0.9.0
+    command:
+      - --haproxy.scrape-uri
+      - http://haproxy:80/haproxy?stats;csv
+    ports:
+      - 9101:9101
+    depends_on:
+      - haproxy
+volumes:
+  db_data:
+  redmine_files:
