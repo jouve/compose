@@ -1,11 +1,7 @@
 version: "2.3"
 services:
   migrate:
-    image: jouve/redmine:3.4.4-1
-    #build:
-    #  context: wyredmine
-    #  args:
-    #    GITLAB_TOKEN: ${GITLAB_TOKEN}
+    image: jouve/redmine
     command:
       - rails
       - r

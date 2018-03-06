@@ -1,14 +1,18 @@
-version: "2.0"
+version: "2.3"
 services:
   gitlab:
-    image: gitlab/gitlab-ce
+    image: gitlab/gitlab-ce:10.4.3-ce.0
     volumes:
-      - gitlab_config:/etc/gitlab
+      - ./gitlab:/etc/gitlab
       - gitlab_logs:/var/log/gitlab
       - gitlab_data:/var/opt/gitlab
+    environment:
+      DB_HOST: db
+      DB_PASSWORD: gitlab
+      REDIS_HOST: redis
     ports:
-      - 443:443
-      - 80:80
+      - 8443:443
+      - 8081:80
       - "2222:22"
     depends_on:
       - db
@@ -19,7 +23,7 @@ services:
       POSTGRES_DB: gitlabhq_production
       POSTGRES_USER: gitlab
       POSTGRES_PASSWORD: gitlab
-  pg_exporter:
+  postgres-exporter:
     image: wrouesnel/postgres_exporter:v0.3.0
     environment:
       DATA_SOURCE_NAME: postgresql://gitlab:gitlab@localhost/gitlabhq_production?sslmode=disable
@@ -28,20 +32,23 @@ services:
     network_mode: service:db
   redis:
     image: redis:alpine
-  redis_exporter:
+  redis-exporter:
     image: oliver006/redis_exporter
     network_mode: service:redis
     depends_on:
       - redis
-#  prometheus:
-#    image: quay.io/prometheus/prometheus:v2.0.0
-#    volumes:
-#      - ./prometheus:/etc/prometheus
-#      - /srv/gitlab/prometheus_data:/prometheus
-#    ports:
-#      - 9090:9090
-
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+  prometheus:
+    image: quay.io/prometheus/prometheus:v2.1.0
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus:/etc/prometheus
+    healthcheck:
+      test: wget --quiet --tries 1 -O /dev/null http://localhost:9090
+    ports:
+      - 9090:9090
 volumes:
-  gitlab_config:
+  prometheus_data:
   gitlab_logs:
   gitlab_data:

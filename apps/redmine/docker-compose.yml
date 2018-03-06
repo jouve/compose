@@ -1,34 +1,11 @@
 version: "2.3"
 services:
-  db:
-    image: mariadb:10.3.4
-    environment:
-      MYSQL_USER: redmine
-      MYSQL_PASSWORD: redmine
-      MYSQL_DATABASE: redmine
-      MYSQL_RANDOM_ROOT_PASSWORD: "1"
-    volumes:
-      - ./db://docker-entrypoint-initdb.d
-      - db_data:/var/lib/mysql
-  mysqld-exporter:
-    image: prom/mysqld-exporter:v0.10.0
-    environment:
-      DATA_SOURCE_NAME: redmine:redmine@(db:3306)/redmine
-    command:
-      - -collect.slave_status=false
-    depends_on:
-      - db
   redmine:
-    image: jouve/redmine:3.4.4-1
-    build:
-      context: wyredmine
-      args:
-        GITLAB_TOKEN: ${GITLAB_TOKEN}
+    image: jouve/redmine
     environment:
       REDMINE_DB_MYSQL: db
       REDMINE_DB_USERNAME: redmine
       REDMINE_DB_PASSWORD: redmine
-      REDMINE_DB_DATABASE: redmine
       REDMINE_SECRET_KEY_BASE: azerty
       REDMINE_NO_DB_MIGRATE: "1"
       #REDMINE_PLUGINS_MIGRATE: "1"
